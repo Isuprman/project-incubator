@@ -3,6 +3,11 @@
 One question per round. Ask in this rough order; adapt to the user's answers.
 Stop early if a clear pain emerges — the goal is a real problem, not a complete questionnaire.
 
+## Round 0: pick the project mode (ask once, before mining)
+
+- 你想要哪种项目形态？**MVP**（约 2 周可验证的最小版本）还是**完整版**（完整系统 / 求职作品，约 1–2 个月规划）？
+- 不确定时默认 MVP。这个选择决定后续评分维度与 spec/工单模板。
+
 ## Round 1–3: mine lived experience
 
 - 过去一个月里，有没有一件反复出现、让你觉得"这事本不该这么麻烦"的小问题？
@@ -22,16 +27,27 @@ Stop early if a clear pain emerges — the goal is a real problem, not a complet
 
 ## Round 9–10: anchor to a concrete surface
 
-- 如果只选一个方向，愿意连续投入两周、即使最后不写进简历也会觉得好玩的，是哪个？
+- 如果只选一个方向，愿意持续投入（MVP 约 2 周 / 完整版约 1–2 个月）、即使最后不写进简历也会觉得好玩的，是哪个？
 - 你最常卡住或拖延的环节是哪一个？（选具体环节，不要泛泛的方向）
 
 ## Exit: synthesize 3 candidates
 
 After ~10 rounds (or earlier if a strong pain is confirmed), synthesize **3 candidate directions**.
-For each: one-line description, pain intensity 1–5, reachability 1–5, 2-week MVP feasibility 1–5.
+For each: one-line description, pain intensity 1–5, reachability 1–5, and the **mode's** feasibility
+dimension (MVP: 2-week MVP feasibility; Full: full delivery feasibility in ~1–2 months).
 Give a recommendation. Wait for the user to pick one.
 
+MVP mode:
+
 | 候选方向 | 痛点强度 | 可触达性 | 两周MVP |
+|---|---|---|---|
+| 1. … | 5/5 | 4/5 | 4/5 |
+| 2. … | 4/5 | 4/5 | 5/5 |
+| 3. … | 4/5 | 3/5 | 3/5 |
+
+Full mode:
+
+| 候选方向 | 痛点强度 | 可触达性 | 完整交付(1–2月) |
 |---|---|---|---|
 | 1. … | 5/5 | 4/5 | 4/5 |
 | 2. … | 4/5 | 4/5 | 5/5 |

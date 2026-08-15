@@ -41,8 +41,9 @@ design-systems / interaction-states / motion / pre-flight 六件套），**任�
 
 ## Usage
 
-Install into any agent that reads SKILL.md (Codex, Claude Code, CodeBuddy, …),
-then trigger by natural language:
+Install into any agent that reads SKILL.md (Codex, Claude Code, CodeBuddy, …).
+This skill is **explicit-invocation** (`disable-model-invocation: true`) — the model won't
+auto-trigger it; invoke it by name:
 
 ```
 用 project-incubator 这个 skill 帮我从 0 孵化一个项目
@@ -50,6 +51,15 @@ then trigger by natural language:
 ```
 
 If you already have an idea, skip Stage 0 and the flow starts at grilling.
+
+## Project modes
+
+Stage 0 asks once which mode you want; it changes scoring, spec and ticket templates downstream:
+
+| Mode | Timeline | Purpose | Scoring dimension |
+|---|---|---|---|
+| MVP | ~2 weeks | Validate a minimal version with real users | 2-week MVP feasibility |
+| Full | ~1–2 months | Build a complete system / portfolio piece | Full delivery feasibility |
 
 ## Files
 

@@ -8,6 +8,7 @@ description: >-
   idea, or wants a complete from-zero-to-code workflow. Combines
   socratic-questioning, grilling, to-spec, to-tickets, tdd, and code-review
   into a single guided pipeline.
+disable-model-invocation: true
 version: 1.0.0
 ---
 
@@ -69,19 +70,34 @@ Trigger: the user has no idea, or a vague feeling ("想做点什么但不知道�
 
 Rules:
 
+- **First, pick the project mode.** Ask the user once, before mining: do they want an **MVP** (a minimal
+  version to validate in ~2 weeks) or a **full version** (a complete system / portfolio piece, planned
+  over ~1–2 months)? Default to MVP if they are unsure. The chosen mode changes the scoring dimensions
+  below and the spec/ticket templates downstream. Do not silently assume one.
 - Ask **one** question per round. Never a list.
 - Mine from: the user's real experience, recurring annoyances, people they can reach, and verifiability.
 - Prefer questions that reveal *pain* and *frequency*, not preferences: "What have you repeatedly wished was less annoying?" beats "What colors do you like?"
 - Do not propose solutions yet. Stay in discovery.
 - The agent does its own fact-finding (filesystem, tools); the user only answers from their life.
 
-Exit condition: after ~10 rounds max, synthesize **3 candidate directions**, each scored:
+Exit condition: after ~10 rounds max, synthesize **3 candidate directions**, each scored by the
+**mode's** dimensions:
+
+MVP mode:
 
 | Dimension | Scale | Meaning |
 |-----------|-------|---------|
 | Pain intensity | 1–5 | How sharp / frequent is the underlying problem |
 | Reachability | 1–5 | Can the user actually reach first users |
 | 2-week MVP | 1–5 | Can a minimal version be built & validated in 2 weeks |
+
+Full mode:
+
+| Dimension | Scale | Meaning |
+|-----------|-------|---------|
+| Pain intensity | 1–5 | How sharp / frequent is the underlying problem |
+| Reachability | 1–5 | Can the user actually reach first users |
+| Full delivery | 1–5 | Can a complete system be delivered in ~1–2 months with real depth (not a demo) |
 
 Present the table, give a recommendation, and **wait for the user to pick one**.
 Do not proceed to Stage 1 until they choose.
@@ -122,13 +138,12 @@ Deliverables:
 
 1. **ADR** — record the key architectural decisions made during grilling (one ADR per significant decision, or one combined ADR). Location: `docs/adr/`.
 2. **CONTEXT.md** — glossary / domain vocabulary that emerged (terms used by the team/domain). Location: repo root.
-3. **spec.md** — a single spec covering:
+3. **spec.md** — a single spec covering (adapted to the **project mode** chosen in Stage 0):
    - Problem & target users
-   - Core value & MVP scope
-   - Explicit non-goals
+   - Core value & scope — MVP mode: "MVP scope" (must-have / explicit non-goals / first validation surface); Full mode: "core modules & complete feature set" (module list, data model, full user journeys, explicit out-of-scope)
    - The review protocol (rubric, scoring, output format)
    - Acceptance criteria (verifiable)
-   - Boundaries & must-not-delete core
+   - Boundaries & must-not-delete core (MVP) / release plan & phase boundaries (Full)
 4. **design-brief.md** (required if the product has any UI; skip only for pure-library/CLI projects) — covers:
    - Page inventory with page-kind classification (system/tool page vs marketing page vs game UI — drives the design-skill routing below)
    - Per-page layout, component states, interaction requirements
