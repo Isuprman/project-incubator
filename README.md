@@ -24,18 +24,20 @@ Stage 3  拆工单          (spec)     → 带依赖的工单列表 + UI 标记
 Stage 4  实现循环        (工单)     → 每张: 设计门 → 测试 → 代码 → 三轴审查 → 完成
 ```
 
-## Design Track（设计路由）
+## Design Track（内置设计引擎）
 
-做系统/网页 UI 时按页面类型自动路由设计 skill，没有对应 skill 时用内置兜底规则：
+设计引擎已**打包进仓库**（`references/design/`，design-taste 合成：SKILL.md + anti-slop /
+design-systems / interaction-states / motion / pre-flight 六件套），**任何环境开箱即用**，
+不需要用户额外安装任何设计 skill。
 
-| 页面类型 | 优先设计 skill | 兜底 |
+| 页面类型 | 主要引擎 | 兜底 |
 |---|---|---|
-| 系统/工具页（表单、表格、仪表盘） | ui-ux-pro-max | design-guidelines.md |
-| 营销/产品页 | design-taste | design-guidelines.md |
-| 游戏 UI | game-ui-design | design-guidelines.md |
+| 营销/产品页 | references/design/（内置 taste） | design-guidelines.md |
+| 系统/工具页（表单、表格、仪表盘） | references/design/（内置 taste） | design-guidelines.md |
+| 游戏 UI | 环境有 game-ui-design 则用，否则内置 | design-guidelines.md |
 
-内置 `references/design-guidelines.md` 编码了同样的硬规则（无背景块、间距 scale、层级、8 状态、反 AI 味），
-任何环境都能跑，只是效果略降。
+`references/design-guidelines.md` 是内置引擎的快速提炼版 + 设计轴审查清单。
+环境里另有专业 skill（如 ui-ux-pro-max）时只能增强、不能替代内置引擎。
 
 ## Usage
 
@@ -53,10 +55,15 @@ If you already have an idea, skip Stage 0 and the flow starts at grilling.
 
 ```
 SKILL.md                         主流程（五阶段 + 阶段闸门 + Design Track）
+ATTRIBUTION.md                   第三方归因表（来源 + 许可索引）
+LICENSES/
+  LICENSE-taste-skill.md         MIT © Leonxlnx
+  LICENSE-impeccable.md          Apache 2.0 © pbakaus
 references/
   socratic-questions.md          Stage 0 问题库
   spec-template.md               Stage 2 spec 模板（含 design brief 小节）
-  design-guidelines.md           内置设计规则 + 设计轴审查清单（无设计 skill 时兜底）
+  design/                        内置设计引擎（taste 六件套，开箱即用）
+  design-guidelines.md           设计规则快速提炼 + 设计轴审查清单
   ticket-template.md             Stage 3 工单模板（含 kind 标记）
   review-axes.md                 Stage 4 三轴审查细则（规范 / spec / 设计）
 ```
@@ -67,15 +74,18 @@ references/
 - **事实 vs 决策**: agent 查事实（文件/工具/子代理），用户只做决策
 - **推荐答案强制**: 质询阶段每个问题必带 ➡️ 推荐答案，避免用户从零想
 - **设计门**: UI 工单不经过设计规范不得实现，实现后必过设计审查轴（治"agent 前端丑"）
+- **自包含设计引擎**: 设计能力打包进仓库，任何用户 clone 即用，不依赖外部安装
 - **审查是工单的一部分**: 测试全绿但任何一轴审查不过 = 未完成
 - **Tracer-bullet 工单**: 每张工单端到端穿透功能栈，而不是孤立切片
 
 ## Attribution
 
-This skill synthesizes ideas from:
-
-- [mattpocock/skills](https://github.com/mattpocock/skills) (MIT) — grilling, to-spec, to-tickets, tdd, code-review workflows
-- AI Agent 从 0 到 1 实战指南 — Socratic idea-mining methodology (B-G-U-C-O-A framework, first-principles MVP scoping)
+- `ATTRIBUTION.md` — 完整的第三方归因与许可索引
+- `LICENSES/` — taste-skill (MIT) 与 impeccable (Apache 2.0) 官方许可证原文
+- 主要来源: [mattpocock/skills](https://github.com/mattpocock/skills) (MIT)、
+  [taste-skill](https://github.com/Leonxlnx/taste-skill) (MIT)、
+  [impeccable](https://github.com/pbakaus/impeccable) (Apache 2.0)、
+  AI Agent 从 0 到 1 实战指南（苏格拉底式引导方法论）
 
 ## License
 

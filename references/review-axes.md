@@ -26,7 +26,8 @@ Does the code match what the spec asked for?
 Does the interface follow the design spec / design guidelines?
 
 - 对照 `design-brief.md` 中该页面的设计规范
-- 用 `references/design-guidelines.md` 的审查速查逐项检查：
+- 用内置设计引擎 `references/design/`（taste 合成）作为设计审查基准
+- 快速兜底检查用 `references/design-guidelines.md` 的审查速查逐项检查：
   - 有无装饰性背景块
   - 间距是否统一 scale、对齐是否一致
   - 字号层级是否分明（≥1.25 倍）
@@ -36,8 +37,8 @@ Does the interface follow the design spec / design guidelines?
   - 无 AI 味元素（渐变文字/玻璃拟态/千篇一律卡片网格等）
   - 布局居中对称、主次分明、状态徽章不挤标题
 
-> 若环境存在设计 skill（ui-ux-pro-max / design-taste / game-ui-design），设计轴优先
-> 按 Design Track 路由使用对应 skill 的规范审查；design-guidelines.md 始终作为兜底基准。
+> 设计引擎已内置（references/design/），任何环境可用；若环境另有 ui-ux-pro-max 等专业 skill，
+> 可增强但不能替代内置引擎。
 
 ## Report format
 

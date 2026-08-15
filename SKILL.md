@@ -139,16 +139,22 @@ Spec and design brief must be **self-contained**: anyone (or any agent) reading 
 
 ### Design Track (design-skill routing)
 
+The design engine is **bundled** with this skill under `references/design/` (the design-taste
+synthesis — see `ATTRIBUTION.md` for sources & licenses). It works in any environment with no
+external installs.
+
 When implementing or reviewing UI, route by page kind:
 
-| Page kind | Preferred design skill | Fallback |
+| Page kind | Primary | Fallback |
 |---|---|---|
-| System / tool pages (forms, tables, dashboards) | `ui-ux-pro-max` | `design-guidelines.md` |
-| Marketing / product pages | `design-taste` | `design-guidelines.md` |
-| Game UI | `game-ui-design` | `design-guidelines.md` |
+| Marketing / product pages | `references/design/` (built-in taste) | `design-guidelines.md` |
+| System / tool pages (forms, tables, dashboards) | `references/design/` (built-in taste) | `design-guidelines.md` |
+| Game UI | environment's `game-ui-design` if available, else `references/design/` | `design-guidelines.md` |
 
-If the preferred skill is unavailable in the current agent, use `references/design-guidelines.md`
-as the built-in fallback — it encodes the same hard rules. Never ship UI without a design pass.
+The bundled `references/design/` engine is always the default; `references/design-guidelines.md`
+remains as a quick-reference/checklist distillation. If the environment additionally has a
+specialized skill (e.g. `ui-ux-pro-max` for system pages), it may be used to *augment*, not
+replace, the built-in engine. Never ship UI without a design pass.
 
 ---
 
@@ -207,7 +213,8 @@ During the loop, the user's role: confirm test seams, resolve design questions t
 
 - `references/socratic-questions.md` — question bank for Stage 0
 - `references/spec-template.md` — spec.md template for Stage 2
-- `references/design-guidelines.md` — built-in design rules + design-axis checklist (fallback when no design skill present; also the design-review baseline)
+- `references/design/` — bundled design engine (design-taste synthesis: SKILL.md + anti-slop, design-systems, interaction-states, motion, pre-flight). Works with no external installs. See `ATTRIBUTION.md` for sources & licenses.
+- `references/design-guidelines.md` — quick-reference distillation + design-axis checklist (fallback / checklist baseline)
 - `references/ticket-template.md` — ticket template for Stage 3 (includes ticket-kind flag)
 - `references/review-axes.md` — standards vs spec vs design review detail for Stage 4
 
