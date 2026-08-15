@@ -7,6 +7,7 @@ Publish to the configured tracker (default: `.scratch/<feature>/issues/NN-<slug>
 ---
 ticket: <NN>
 status: ready-for-agent
+kind: <logic | ui>   # ui 工单受 Stage 4 设计门约束
 ---
 
 # <Short Title>
@@ -26,7 +27,7 @@ status: ready-for-agent
 
 ## Notes
 
-<implementation notes, links to spec sections>
+<implementation notes, links to spec sections, design-brief page reference for ui tickets>
 ```
 
 ## Tracer-bullet principle

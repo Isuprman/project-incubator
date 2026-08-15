@@ -15,14 +15,15 @@ version: 1.0.0
 
 A single guided pipeline that takes a project from *nothing* to *working code with tests and review*.
 
-It merges six workflows into one flow:
+It merges seven workflows into one flow:
 
 1. **Socratic idea mining** — when the user has no idea, interview them one question at a time to dig out a real problem worth building.
 2. **Decision-tree grilling** — stress-test the chosen direction with a relentless interview; every question carries a recommended answer.
-3. **Fixing** — turn the agreed design tree into ADR + CONTEXT.md + spec.
-4. **Ticket splitting** — break the spec into independently deliverable tickets with blocking edges.
-5. **Test-first implementation** — implement tickets one by one (red → green → refactor).
-6. **Built-in review** — every ticket is reviewed against repo standards + spec before it counts as done.
+3. **Fixing** — turn the agreed design tree into ADR + CONTEXT.md + spec + design brief.
+4. **Ticket splitting** — break the spec into independently deliverable tickets with blocking edges, flagging UI tickets.
+5. **Design gating** — UI tickets are gated by a design pass *before* implementation and a design axis *after* (see Design Track).
+6. **Test-first implementation** — implement tickets one by one (red → green → refactor).
+7. **Built-in review** — every ticket is reviewed against repo standards + spec + design before it counts as done.
 
 The pipeline is **stage-gated**: the agent must not skip a stage, and must not start
 implementing before the user confirms the shared understanding.
@@ -48,17 +49,17 @@ The user can also start mid-pipeline: if they already have an idea, skip Stage 0
 ```
 Stage 0  Socratic mining    (no idea yet)      → 3 candidate directions, scored
 Stage 1  Grilling           (has a direction)  → agreed design tree
-Stage 2  Fixing             (agreed tree)      → ADR + CONTEXT.md + spec
-Stage 3  Ticket splitting   (spec)             → ordered tickets w/ dependencies
-Stage 4  Build loop         (tickets)          → per ticket: tests → code → review → done
+Stage 2  Fixing             (agreed tree)      → ADR + CONTEXT.md + spec + design brief
+Stage 3  Ticket splitting   (spec)             → ordered tickets w/ dependencies + UI flags
+Stage 4  Build loop         (tickets)          → per ticket: design gate → tests → code → 3-axis review → done
 ```
 
 **Stage gates — do not skip:**
 - Stage 0 → 1: user picked one candidate direction.
-- Stage 1 → 2: user confirmed the shared understanding (frontier empty).
-- Stage 2 → 3: spec is written and accepted.
-- Stage 3 → 4: tickets are confirmed (grain + dependencies).
-- Within Stage 4, each ticket: tests written first → implementation → review passed → next.
+- **Stage 1 → 2**: user confirmed the shared understanding (frontier empty).
+- **Stage 2 → 3**: spec (and design brief, if UI is involved) is written and accepted.
+- **Stage 3 → 4**: tickets are confirmed (grain + dependencies).
+- **Within Stage 4, each ticket**: design gate (UI tickets) → tests written first → implementation → 3-axis review passed → next.
 
 ---
 
@@ -113,7 +114,7 @@ Exit condition: frontier is empty — every branch visited, nothing silently ass
 
 ---
 
-## Stage 2 — Fixing (ADR + CONTEXT.md + spec)
+## Stage 2 — Fixing (ADR + CONTEXT.md + spec + design brief)
 
 Trigger: user confirmed the design tree.
 
@@ -128,8 +129,26 @@ Deliverables:
    - The review protocol (rubric, scoring, output format)
    - Acceptance criteria (verifiable)
    - Boundaries & must-not-delete core
+4. **design-brief.md** (required if the product has any UI; skip only for pure-library/CLI projects) — covers:
+   - Page inventory with page-kind classification (system/tool page vs marketing page vs game UI — drives the design-skill routing below)
+   - Per-page layout, component states, interaction requirements
+   - Design principles distilled from the user's stated taste (e.g. no decorative background blocks; hierarchy via spacing/type/alignment; centered & symmetric; status badges must not crowd titles)
+   - 2–3 distinct visual directions with tradeoffs → user picks one → refine
 
-Spec must be **self-contained**: anyone (or any agent) reading it can implement without asking the user.
+Spec and design brief must be **self-contained**: anyone (or any agent) reading them can implement without asking the user.
+
+### Design Track (design-skill routing)
+
+When implementing or reviewing UI, route by page kind:
+
+| Page kind | Preferred design skill | Fallback |
+|---|---|---|
+| System / tool pages (forms, tables, dashboards) | `ui-ux-pro-max` | `design-guidelines.md` |
+| Marketing / product pages | `design-taste` | `design-guidelines.md` |
+| Game UI | `game-ui-design` | `design-guidelines.md` |
+
+If the preferred skill is unavailable in the current agent, use `references/design-guidelines.md`
+as the built-in fallback — it encodes the same hard rules. Never ship UI without a design pass.
 
 ---
 
@@ -141,8 +160,9 @@ Break the spec into **tracer-bullet tickets**:
 
 - Each ticket is independently deliverable and verifiable.
 - Declare **blocking edges**: ticket B blocked by ticket A ("Blocked by: A").
+- **Flag ticket kind**: `logic` (pure logic / no UI) or `ui` (touches interface). UI tickets reference the relevant design-brief page in their Notes and are subject to the design gate in Stage 4.
 - Publish to the configured tracker (local Markdown under `.scratch/<feature>/issues/` by default).
-- Each ticket contains: deliverable, acceptance criteria, blocked-by, estimated scope.
+- Each ticket contains: deliverable, acceptance criteria, blocked-by, ticket kind, estimated scope.
 
 Present the ticket list to the user. Confirm **grain and dependencies** before starting Stage 4.
 The user may request merges/splits/dependency changes — apply them.
@@ -156,15 +176,17 @@ Trigger: tickets confirmed.
 Process **one ticket at a time**, in dependency order:
 
 1. **Confirm the public test seam.** Before writing tests, state the external contract(s) of this ticket (function signatures, endpoints, components) and confirm with the user.
-2. **Write tests first** (red) — cover the contract: happy path, edge cases, failure branches.
-3. **Implement** (green) — minimal code to pass.
-4. **Refactor** (optional) — keep green.
-5. **Review this ticket** — two axes, in parallel sub-agents:
+2. **Design gate (UI tickets only).** Before implementing a `ui` ticket: load the design brief page for this surface, then run the design pass — invoke the routed design skill (see Design Track) or apply `references/design-guidelines.md` — and state the concrete design spec for this page (spacing scale, type hierarchy, accent color, states). Do not implement UI without this pass.
+3. **Write tests first** (red) — cover the contract: happy path, edge cases, failure branches.
+4. **Implement** (green) — minimal code to pass, following the design spec for UI tickets.
+5. **Refactor** (optional) — keep green.
+6. **Review this ticket** — three axes, in parallel sub-agents:
    - **Standards**: does the code follow the repo's documented standards?
    - **Spec**: does it match what the spec asked for?
-   Report both side by side.
-6. **Done = tests green + review passed.** If review finds issues: fix → re-run tests → re-review. Never skip review to save time.
-7. Mark the ticket done, move to the next.
+   - **Design** (UI tickets): does the interface follow the design spec / design-guidelines (spacing scale, alignment, hierarchy, no AI-slop, states complete)?
+   Report all three side by side.
+7. **Done = tests green + all reviews passed.** If any review finds issues: fix → re-run tests → re-review. Never skip review to save time.
+8. Mark the ticket done, move to the next.
 
 During the loop, the user's role: confirm test seams, resolve design questions the review surfaces, and accept/reject review findings. The agent implements, tests, and reviews.
 
@@ -178,14 +200,16 @@ During the loop, the user's role: confirm test seams, resolve design questions t
 - **Recommended answers are mandatory in Stage 1.** A question without `➡️` forces the user to invent answers — the #1 friction point.
 - **Facts vs decisions**: agent finds facts, user makes decisions. Never make the user research.
 - **Review is part of the ticket, not an afterthought.** A ticket that passes tests but fails review is not done.
+- **Never ship UI without a design pass.** UI tickets skip the design gate only when the ticket is flagged `logic`. This is the #1 fix for "the agent's frontend is ugly".
 - **Spec drift**: if Stage 4 reveals the spec is wrong, update the spec + ADR (with a note) instead of silently coding around it.
 
 ## References
 
 - `references/socratic-questions.md` — question bank for Stage 0
 - `references/spec-template.md` — spec.md template for Stage 2
-- `references/ticket-template.md` — ticket template for Stage 3
-- `references/review-axes.md` — standards vs spec review detail for Stage 4
+- `references/design-guidelines.md` — built-in design rules + design-axis checklist (fallback when no design skill present; also the design-review baseline)
+- `references/ticket-template.md` — ticket template for Stage 3 (includes ticket-kind flag)
+- `references/review-axes.md` — standards vs spec vs design review detail for Stage 4
 
 ## Attribution
 
