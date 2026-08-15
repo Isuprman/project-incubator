@@ -194,6 +194,27 @@ The user may request merges/splits/dependency changes — apply them.
 
 Trigger: tickets confirmed.
 
+**Execution rhythm (critical):** process tickets **one at a time, in dependency order, and
+finish each ticket completely before reporting back to the user.** Within a ticket, work in one
+continuous pass — do NOT stop after each sub-step (tests written, backend done, frontend done…)
+to report progress and wait. The agent completes the whole ticket (test seam → design gate →
+red → green → refactor → 3-axis review → mark done), then reports **once** with the deliverable
+summary and **waits for the user's confirmation before starting the next ticket**.
+
+Stop for the user ONLY at these gates:
+
+1. **Test-seam confirmation** — before writing tests, state the contract and get a yes/no.
+2. **Design-direction choice** — the design gate may need the user to pick a visual direction.
+3. **Ticket-done confirmation** — after a ticket is fully done (tests green + all reviews
+   passed), report the deliverable and wait for the user to say "next" / confirm before moving
+   to the next ticket. Do not auto-start the next ticket.
+
+Everything else (writing tests, implementing, refactoring, re-running tests, fixing review
+findings, marking done) proceeds without waiting. If the environment interrupts (build
+timeout, daemon not running), fix or work around it and continue; only surface a blocker to
+the user when it genuinely requires their action. Do not emit "I will continue…" progress
+messages mid-ticket — just keep working until the ticket is done.
+
 Process **one ticket at a time**, in dependency order:
 
 1. **Confirm the public test seam.** Before writing tests, state the external contract(s) of this ticket (function signatures, endpoints, components) and confirm with the user.
@@ -207,9 +228,11 @@ Process **one ticket at a time**, in dependency order:
    - **Design** (UI tickets): does the interface follow the design spec / design-guidelines (spacing scale, alignment, hierarchy, no AI-slop, states complete)?
    Report all three side by side.
 7. **Done = tests green + all reviews passed.** If any review finds issues: fix → re-run tests → re-review. Never skip review to save time.
-8. Mark the ticket done, move to the next.
+8. Mark the ticket done, then **report once** (deliverables + test results + review verdicts) and **wait for the user's confirmation** before starting the next ticket.
 
-During the loop, the user's role: confirm test seams, resolve design questions the review surfaces, and accept/reject review findings. The agent implements, tests, and reviews.
+During the loop, the user's role: confirm test seams, pick design directions, and confirm each
+completed ticket. The agent implements, tests, and reviews without step-by-step prompting; the
+user does not drive progress inside a ticket.
 
 ---
 
@@ -221,6 +244,7 @@ During the loop, the user's role: confirm test seams, resolve design questions t
 - **Recommended answers are mandatory in Stage 1.** A question without `➡️` forces the user to invent answers — the #1 friction point.
 - **Facts vs decisions**: agent finds facts, user makes decisions. Never make the user research.
 - **Review is part of the ticket, not an afterthought.** A ticket that passes tests but fails review is not done.
+- **Finish the ticket before reporting.** Do not emit mid-ticket progress updates ("backend done", "I will continue…") and stop for the user only at the three gates: test-seam, design direction, ticket-done confirmation.
 - **Never ship UI without a design pass.** UI tickets skip the design gate only when the ticket is flagged `logic`. This is the #1 fix for "the agent's frontend is ugly".
 - **Spec drift**: if Stage 4 reveals the spec is wrong, update the spec + ADR (with a note) instead of silently coding around it.
 
