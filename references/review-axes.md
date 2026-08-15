@@ -1,0 +1,48 @@
+# Stage 4 — Review Axes
+
+Every ticket is reviewed on two independent axes, run in parallel sub-agents,
+reported side by side. A ticket is **done** only when tests are green AND both reviews pass.
+
+## Axis 1 — Standards
+
+Does the code follow the repo's documented standards?
+
+- 是否符合仓库既有约定（目录结构、命名、样式系统、错误处理）
+- 是否有无关重构（scope creep）
+- 是否有安全/性能/可访问性明显问题
+- 是否有重复代码本应复用现有实现
+
+## Axis 2 — Spec
+
+Does the code match what the spec asked for?
+
+- 是否实现了 spec 中该工单覆盖的验收标准（逐条对照）
+- 是否包含 spec 明确不做的功能（越界）
+- 行为是否符合 spec 定义的协议/输出格式
+- 测试是否覆盖了该工单的公共契约（happy path + 边界 + 失败分支）
+
+## Report format
+
+```
+## Review: <ticket NN>
+
+### Standards
+- ✅ / ❌ <finding>（证据）
+- …
+
+### Spec
+- ✅ / ❌ <finding>（对照 spec 第 X 节）
+- …
+
+### Verdict
+PASS / FAIL（附最优先修复项）
+```
+
+## If review fails
+
+1. 修复发现的问题
+2. 重跑测试
+3. 重新审查
+4. 通过后才标记工单完成，进入下一张
+
+Never skip review to save time. Review is part of the ticket.
