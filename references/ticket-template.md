@@ -7,7 +7,6 @@ Publish to the configured tracker (default: `.scratch/<feature>/issues/NN-<slug>
 ---
 ticket: <NN>
 status: ready-for-agent
-kind: <logic | ui>   # ui 工单受 Stage 4 设计门约束
 ---
 
 # <Short Title>
@@ -26,11 +25,6 @@ kind: <logic | ui>   # ui 工单受 Stage 4 设计门约束
 <该工单需要的 spec 相关章节摘录：涉及的功能、协议、验收标准原文。>
 <让实现者只读本工单就能开工，不依赖回忆或翻全文。>
 
-## Design excerpt (ui tickets only)
-
-<该工单涉及页面的 design-brief 摘录：布局、间距、字体、强调色、状态、响应式规则。>
-<设计门与设计审查都以本摘录 + design-brief 原文为基准。>
-
 ## Blocked by
 
 - <ticket NN>（无依赖则写：无，可立即开始）
@@ -42,8 +36,7 @@ kind: <logic | ui>   # ui 工单受 Stage 4 设计门约束
 
 ## 自包含原则（Critical）
 
-- 每张工单必须包含 Spec excerpt（和 UI 工单的 Design excerpt），把该工单需要的
-  约束从 spec/design-brief 中摘录进工单文件本身。
+- 每张工单必须包含 Spec excerpt，把该工单需要的约束从 spec 中摘录进工单文件本身。
 - 实现者开工时**只读本工单文件**即可，不需要回忆对话或翻全文。
 - 摘录要完整到"不读原文也能实现"，而不是只写"见 spec 第 X 节"。
 

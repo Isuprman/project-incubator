@@ -16,15 +16,14 @@ version: 1.0.0
 
 A single guided pipeline that takes a project from *nothing* to *working code with tests and review*.
 
-It merges seven workflows into one flow:
+It merges six workflows into one flow:
 
 1. **Socratic idea mining** — when the user has no idea, interview them one question at a time to dig out a real problem worth building.
 2. **Decision-tree grilling** — stress-test the chosen direction with a relentless interview; every question carries a recommended answer.
-3. **Fixing** — turn the agreed design tree into ADR + CONTEXT.md + spec + design brief.
-4. **Ticket splitting** — break the spec into independently deliverable tickets with blocking edges, flagging UI tickets.
-5. **Design gating** — UI tickets are gated by a design pass *before* implementation and a design axis *after* (see Design Track).
-6. **Test-first implementation** — implement tickets one by one (red → green → refactor).
-7. **Built-in review** — every ticket is reviewed against repo standards + spec + design before it counts as done.
+3. **Fixing** — turn the agreed design tree into ADR + CONTEXT.md + spec.
+4. **Ticket splitting** — break the spec into independently deliverable tickets with blocking edges.
+5. **Test-first implementation** — implement tickets one by one (red → green → refactor).
+6. **Built-in review** — every ticket is reviewed against repo standards + spec before it counts as done.
 
 The pipeline is **stage-gated**: the agent must not skip a stage, and must not start
 implementing before the user confirms the shared understanding.
@@ -50,17 +49,17 @@ The user can also start mid-pipeline: if they already have an idea, skip Stage 0
 ```
 Stage 0  Socratic mining    (no idea yet)      → 3 candidate directions, scored
 Stage 1  Grilling           (has a direction)  → agreed design tree
-Stage 2  Fixing             (agreed tree)      → ADR + CONTEXT.md + spec + design brief
-Stage 3  Ticket splitting   (spec)             → ordered tickets w/ dependencies + UI flags
-Stage 4  Build loop         (tickets)          → per ticket: design gate → tests → code → 3-axis review → done
+Stage 2  Fixing             (agreed tree)      → ADR + CONTEXT.md + spec
+Stage 3  Ticket splitting   (spec)             → ordered tickets w/ dependencies
+Stage 4  Build loop         (tickets)          → per ticket: tests → code → review → done
 ```
 
 **Stage gates — do not skip:**
 - Stage 0 → 1: user picked one candidate direction.
 - **Stage 1 → 2**: user confirmed the shared understanding (frontier empty).
-- **Stage 2 → 3**: spec (and design brief, if UI is involved) is written and accepted.
+- **Stage 2 → 3**: spec is written and accepted.
 - **Stage 3 → 4**: tickets are confirmed (grain + dependencies).
-- **Within Stage 4, each ticket**: design gate (UI tickets) → tests written first → implementation → 3-axis review passed → next.
+- **Within Stage 4, each ticket**: tests written first → implementation → review passed → next.
 
 ---
 
@@ -130,7 +129,7 @@ Exit condition: frontier is empty — every branch visited, nothing silently ass
 
 ---
 
-## Stage 2 — Fixing (ADR + CONTEXT.md + spec + design brief)
+## Stage 2 — Fixing (ADR + CONTEXT.md + spec)
 
 Trigger: user confirmed the design tree.
 
@@ -144,32 +143,8 @@ Deliverables:
    - The review protocol (rubric, scoring, output format)
    - Acceptance criteria (verifiable)
    - Boundaries & must-not-delete core (MVP) / release plan & phase boundaries (Full)
-4. **design-brief.md** (required if the product has any UI; skip only for pure-library/CLI projects) — covers:
-   - Page inventory with page-kind classification (system/tool page vs marketing page vs game UI — drives the design-skill routing below)
-   - Per-page layout, component states, interaction requirements
-   - Design principles distilled from the user's stated taste (e.g. no decorative background blocks; hierarchy via spacing/type/alignment; centered & symmetric; status badges must not crowd titles)
-   - 2–3 distinct visual directions with tradeoffs → user picks one → refine
 
-Spec and design brief must be **self-contained**: anyone (or any agent) reading them can implement without asking the user.
-
-### Design Track (design-skill routing)
-
-The design engine is **bundled** with this skill under `references/design/` (the design-taste
-synthesis — see `ATTRIBUTION.md` for sources & licenses). It works in any environment with no
-external installs.
-
-When implementing or reviewing UI, route by page kind:
-
-| Page kind | Primary | Fallback |
-|---|---|---|
-| Marketing / product pages | `references/design/` (built-in taste) | `design-guidelines.md` |
-| System / tool pages (forms, tables, dashboards) | `references/design/` (built-in taste) | `design-guidelines.md` |
-| Game UI | environment's `game-ui-design` if available, else `references/design/` | `design-guidelines.md` |
-
-The bundled `references/design/` engine is always the default; `references/design-guidelines.md`
-remains as a quick-reference/checklist distillation. If the environment additionally has a
-specialized skill (e.g. `ui-ux-pro-max` for system pages), it may be used to *augment*, not
-replace, the built-in engine. Never ship UI without a design pass.
+Spec must be **self-contained**: anyone (or any agent) reading it can implement without asking the user.
 
 ---
 
@@ -181,10 +156,9 @@ Break the spec into **tracer-bullet tickets**:
 
 - Each ticket is independently deliverable and verifiable.
 - Declare **blocking edges**: ticket B blocked by ticket A ("Blocked by: A").
-- **Flag ticket kind**: `logic` (pure logic / no UI) or `ui` (touches interface). UI tickets reference the relevant design-brief page in their Notes and are subject to the design gate in Stage 4.
-- **Embed Spec excerpt** in every ticket (and Design excerpt for UI tickets): copy the relevant spec/design-brief sections verbatim into the ticket file so the implementer can work from the ticket alone, without recalling the conversation or re-reading the full docs. This is mandatory — a ticket that says "see spec §X" instead of quoting it is incomplete.
+- **Embed Spec excerpt** in every ticket: copy the relevant spec sections verbatim into the ticket file so the implementer can work from the ticket alone, without recalling the conversation or re-reading the full docs. This is mandatory — a ticket that says "see spec §X" instead of quoting it is incomplete.
 - Publish to the configured tracker (local Markdown under `.scratch/<feature>/issues/` by default).
-- Each ticket contains: deliverable, acceptance criteria, spec excerpt, design excerpt (UI), blocked-by, ticket kind, estimated scope.
+- Each ticket contains: deliverable, acceptance criteria, spec excerpt, blocked-by, estimated scope.
 
 Present the ticket list to the user. Confirm **grain and dependencies** before starting Stage 4.
 The user may request merges/splits/dependency changes — apply them.
@@ -198,17 +172,16 @@ Trigger: tickets confirmed.
 **Execution rhythm (critical):** process tickets **one at a time, in dependency order, and
 finish each ticket completely before reporting back to the user.** Within a ticket, work in one
 continuous pass — do NOT stop after each sub-step (tests written, backend done, frontend done…)
-to report progress and wait. The agent completes the whole ticket (test seam → design gate →
-red → green → refactor → 3-axis review → mark done), then reports **once** with the deliverable
-summary and **waits for the user's confirmation before starting the next ticket**.
+to report progress and wait. The agent completes the whole ticket (test seam → red → green →
+refactor → review → mark done), then reports **once** with the deliverable summary and **waits
+for the user's confirmation before starting the next ticket**.
 
 Stop for the user ONLY at these gates:
 
 1. **Test-seam confirmation** — before writing tests, state the contract and get a yes/no.
-2. **Design-direction choice** — the design gate may need the user to pick a visual direction.
-3. **Ticket-done confirmation** — after a ticket is fully done (tests green + all reviews
-   passed), report the deliverable and wait for the user to say "next" / confirm before moving
-   to the next ticket. Do not auto-start the next ticket.
+2. **Ticket-done confirmation** — after a ticket is fully done (tests green + review passed),
+   report the deliverable and wait for the user to say "next" / confirm before moving to the
+   next ticket. Do not auto-start the next ticket.
 
 Everything else (writing tests, implementing, refactoring, re-running tests, fixing review
 findings, marking done) proceeds without waiting. If the environment interrupts (build
@@ -217,38 +190,34 @@ the user when it genuinely requires their action. Do not emit "I will continue�
 messages mid-ticket — just keep working until the ticket is done.
 
 **Re-read the docs at fixed nodes (anti-drift, critical):** long flows dilute early context
-(spec, design brief, acceptance criteria) and the agent starts working from memory. To counter
-this, re-read the relevant files at these fixed points — never rely on memory for constraints:
+(spec, acceptance criteria) and the agent starts working from memory. To counter this, re-read
+the relevant files at these fixed points — never rely on memory for constraints:
 
-1. **Ticket start** — re-read the ticket file (its embedded Spec/Design excerpt), and the
-   acceptance criteria of the current ticket. Work from the file, not from memory.
-2. **Design gate (UI tickets)** — re-read the design-brief page for this surface in full
-   (typography, spacing, accent, states, responsive rules) before stating the design spec.
-3. **Before review** — re-read the ticket's acceptance criteria + spec excerpt, then check the
+1. **Ticket start** — re-read the ticket file (its embedded Spec excerpt) and the acceptance
+   criteria of the current ticket. Work from the file, not from memory.
+2. **Before review** — re-read the ticket's acceptance criteria + spec excerpt, then check the
    implementation against them line by line. If the review finds the implementation drifts
    from the excerpt, the review must FAIL, not be waived.
-4. **Every 2–3 tickets** — re-read the global spec.md + CONTEXT.md once to prevent cross-ticket
+3. **Every 2–3 tickets** — re-read the global spec.md + CONTEXT.md once to prevent cross-ticket
    drift (e.g. forgetting an explicit non-goal). If the full spec is long, at minimum re-read
    the acceptance criteria and non-goals sections.
 
 Process **one ticket at a time**, in dependency order:
 
 1. **Confirm the public test seam.** Before writing tests, state the external contract(s) of this ticket (function signatures, endpoints, components) and confirm with the user.
-2. **Design gate (UI tickets only).** Before implementing a `ui` ticket: load the design brief page for this surface, then run the design pass — invoke the routed design skill (see Design Track) or apply `references/design-guidelines.md` — and state the concrete design spec for this page (spacing scale, type hierarchy, accent color, states). Do not implement UI without this pass.
-3. **Write tests first** (red) — cover the contract: happy path, edge cases, failure branches.
-4. **Implement** (green) — minimal code to pass, following the design spec for UI tickets.
-5. **Refactor** (optional) — keep green.
-6. **Review this ticket** — three axes, in parallel sub-agents:
+2. **Write tests first** (red) — cover the contract: happy path, edge cases, failure branches.
+3. **Implement** (green) — minimal code to pass.
+4. **Refactor** (optional) — keep green.
+5. **Review this ticket** — two axes, in parallel sub-agents:
    - **Standards**: does the code follow the repo's documented standards?
    - **Spec**: does it match what the spec asked for?
-   - **Design** (UI tickets): does the interface follow the design spec / design-guidelines (spacing scale, alignment, hierarchy, no AI-slop, states complete)?
-   Report all three side by side.
-7. **Done = tests green + all reviews passed.** If any review finds issues: fix → re-run tests → re-review. Never skip review to save time.
-8. Mark the ticket done, then **report once** (deliverables + test results + review verdicts) and **wait for the user's confirmation** before starting the next ticket.
+   Report both side by side.
+6. **Done = tests green + all reviews passed.** If any review finds issues: fix → re-run tests → re-review. Never skip review to save time.
+7. Mark the ticket done, then **report once** (deliverables + test results + review verdicts) and **wait for the user's confirmation** before starting the next ticket.
 
-During the loop, the user's role: confirm test seams, pick design directions, and confirm each
-completed ticket. The agent implements, tests, and reviews without step-by-step prompting; the
-user does not drive progress inside a ticket.
+During the loop, the user's role: confirm test seams, and confirm each completed ticket. The
+agent implements, tests, and reviews without step-by-step prompting; the user does not drive
+progress inside a ticket.
 
 ---
 
@@ -260,19 +229,16 @@ user does not drive progress inside a ticket.
 - **Recommended answers are mandatory in Stage 1.** A question without `➡️` forces the user to invent answers — the #1 friction point.
 - **Facts vs decisions**: agent finds facts, user makes decisions. Never make the user research.
 - **Review is part of the ticket, not an afterthought.** A ticket that passes tests but fails review is not done.
-- **Finish the ticket before reporting.** Do not emit mid-ticket progress updates ("backend done", "I will continue…") and stop for the user only at the three gates: test-seam, design direction, ticket-done confirmation.
-- **Never work from memory on constraints.** Re-read the ticket file (and design brief / spec excerpts) at ticket start, design gate, and before review — the anti-drift nodes in Stage 4. Drift is how "spec said X, code does Y" happens.
-- **Never ship UI without a design pass.** UI tickets skip the design gate only when the ticket is flagged `logic`. This is the #1 fix for "the agent's frontend is ugly".
+- **Finish the ticket before reporting.** Do not emit mid-ticket progress updates ("backend done", "I will continue…") and stop for the user only at the two gates: test-seam and ticket-done confirmation.
+- **Never work from memory on constraints.** Re-read the ticket file (and spec excerpts) at ticket start and before review — the anti-drift nodes in Stage 4. Drift is how "spec said X, code does Y" happens.
 - **Spec drift**: if Stage 4 reveals the spec is wrong, update the spec + ADR (with a note) instead of silently coding around it.
 
 ## References
 
 - `references/socratic-questions.md` — question bank for Stage 0
 - `references/spec-template.md` — spec.md template for Stage 2
-- `references/design/` — bundled design engine (design-taste synthesis: SKILL.md + anti-slop, design-systems, interaction-states, motion, pre-flight). Works with no external installs. See `ATTRIBUTION.md` for sources & licenses.
-- `references/design-guidelines.md` — quick-reference distillation + design-axis checklist (fallback / checklist baseline)
-- `references/ticket-template.md` — ticket template for Stage 3 (includes ticket-kind flag)
-- `references/review-axes.md` — standards vs spec vs design review detail for Stage 4
+- `references/ticket-template.md` — ticket template for Stage 3
+- `references/review-axes.md` — standards vs spec review detail for Stage 4
 
 ## Attribution
 

@@ -67,13 +67,4 @@ MVP 必须有：
 - 完整版模式：<release plan / phase boundaries: 分阶段验收点，每阶段可演示、可审查>；
   <每个模块的验收信号与模块间依赖顺序>
 - 两种模式通用：<what to do if the signal is weak — narrow & diagnose, do NOT expand scope>
-
-## 7. Design Brief (if the product has any UI)
-
-> 单独产出 design-brief.md，本节省略号；要点如下：
-
-- 页面清单 + 页面类型分类（system/tool / marketing / game UI —— 决定设计 skill 路由）
-- 每页布局、组件状态、交互要求
-- 设计原则（来自用户的审美偏好：无装饰背景块、纯排版层级、居中对称、状态徽章不挤标题等）
-- 2–3 个视觉方向 + 取舍 → 用户选一个 → 细化
 ```
