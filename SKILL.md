@@ -182,8 +182,9 @@ Break the spec into **tracer-bullet tickets**:
 - Each ticket is independently deliverable and verifiable.
 - Declare **blocking edges**: ticket B blocked by ticket A ("Blocked by: A").
 - **Flag ticket kind**: `logic` (pure logic / no UI) or `ui` (touches interface). UI tickets reference the relevant design-brief page in their Notes and are subject to the design gate in Stage 4.
+- **Embed Spec excerpt** in every ticket (and Design excerpt for UI tickets): copy the relevant spec/design-brief sections verbatim into the ticket file so the implementer can work from the ticket alone, without recalling the conversation or re-reading the full docs. This is mandatory — a ticket that says "see spec §X" instead of quoting it is incomplete.
 - Publish to the configured tracker (local Markdown under `.scratch/<feature>/issues/` by default).
-- Each ticket contains: deliverable, acceptance criteria, blocked-by, ticket kind, estimated scope.
+- Each ticket contains: deliverable, acceptance criteria, spec excerpt, design excerpt (UI), blocked-by, ticket kind, estimated scope.
 
 Present the ticket list to the user. Confirm **grain and dependencies** before starting Stage 4.
 The user may request merges/splits/dependency changes — apply them.
@@ -215,6 +216,21 @@ timeout, daemon not running), fix or work around it and continue; only surface a
 the user when it genuinely requires their action. Do not emit "I will continue…" progress
 messages mid-ticket — just keep working until the ticket is done.
 
+**Re-read the docs at fixed nodes (anti-drift, critical):** long flows dilute early context
+(spec, design brief, acceptance criteria) and the agent starts working from memory. To counter
+this, re-read the relevant files at these fixed points — never rely on memory for constraints:
+
+1. **Ticket start** — re-read the ticket file (its embedded Spec/Design excerpt), and the
+   acceptance criteria of the current ticket. Work from the file, not from memory.
+2. **Design gate (UI tickets)** — re-read the design-brief page for this surface in full
+   (typography, spacing, accent, states, responsive rules) before stating the design spec.
+3. **Before review** — re-read the ticket's acceptance criteria + spec excerpt, then check the
+   implementation against them line by line. If the review finds the implementation drifts
+   from the excerpt, the review must FAIL, not be waived.
+4. **Every 2–3 tickets** — re-read the global spec.md + CONTEXT.md once to prevent cross-ticket
+   drift (e.g. forgetting an explicit non-goal). If the full spec is long, at minimum re-read
+   the acceptance criteria and non-goals sections.
+
 Process **one ticket at a time**, in dependency order:
 
 1. **Confirm the public test seam.** Before writing tests, state the external contract(s) of this ticket (function signatures, endpoints, components) and confirm with the user.
@@ -245,6 +261,7 @@ user does not drive progress inside a ticket.
 - **Facts vs decisions**: agent finds facts, user makes decisions. Never make the user research.
 - **Review is part of the ticket, not an afterthought.** A ticket that passes tests but fails review is not done.
 - **Finish the ticket before reporting.** Do not emit mid-ticket progress updates ("backend done", "I will continue…") and stop for the user only at the three gates: test-seam, design direction, ticket-done confirmation.
+- **Never work from memory on constraints.** Re-read the ticket file (and design brief / spec excerpts) at ticket start, design gate, and before review — the anti-drift nodes in Stage 4. Drift is how "spec said X, code does Y" happens.
 - **Never ship UI without a design pass.** UI tickets skip the design gate only when the ticket is flagged `logic`. This is the #1 fix for "the agent's frontend is ugly".
 - **Spec drift**: if Stage 4 reveals the spec is wrong, update the spec + ADR (with a note) instead of silently coding around it.
 
