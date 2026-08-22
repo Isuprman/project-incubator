@@ -17,6 +17,7 @@ Does the code follow the repo's documented standards?
 Does the code match what the spec asked for?
 
 - 是否实现了 spec 中该工单覆盖的验收标准（逐条对照）
+- **接口契约逐字段核验**：spec §Interface Contract 表中与本工单相关的每个命令/端点——选项/参数是否真实存在、输出形状是否一致、错误约定是否兑现（「文档写有、代码没有」= FAIL，本项不可豁免）
 - 是否包含 spec 明确不做的功能（越界）
 - 行为是否符合 spec 定义的协议/输出格式
 - 测试是否覆盖了该工单的公共契约（happy path + 边界 + 失败分支）
