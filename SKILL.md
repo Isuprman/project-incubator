@@ -9,7 +9,7 @@ description: >-
   socratic-questioning, grilling, to-spec, to-tickets, tdd, and code-review
   into a single guided pipeline.
 disable-model-invocation: true
-version: 1.0.0
+version: 1.1.0
 ---
 
 # Project Incubator
@@ -219,6 +219,13 @@ During the loop, the user's role: confirm test seams, and confirm each completed
 agent implements, tests, and reviews without step-by-step prompting; the user does not drive
 progress inside a ticket.
 
+### Session sizing & resilience（批次与续跑纪律 — 必须遵守）
+
+- **单次代理会话最多处理 2 张工单。** 更长的批次会因上下文/输出预算耗尽而**静默中断**（实测：进程退出码可能仍为 0，且最终报告缺失）。编排方必须按依赖序分批派发，宁小勿大。
+- **每张工单完成后，立即向 `.scratch/<feature>/progress.log` 追加一行**：`<NN> done <测试数> <ISO时间>`。这是断点检测的唯一依据——会话死亡时，日志里缺失的第一张工单即恢复点。
+- **续跑协议**：新会话开工前先读 progress.log 与各工单 frontmatter 的 status，跳过 done 工单，从第一张未完成工单继续；不重做已完成工单。
+- 判断成败以 progress.log 为准，不以「有无最终报告」为准——报告可能因中断而丢失，落盘进度不会。
+
 ---
 
 ## Pitfalls
@@ -232,6 +239,8 @@ progress inside a ticket.
 - **Finish the ticket before reporting.** Do not emit mid-ticket progress updates ("backend done", "I will continue…") and stop for the user only at the two gates: test-seam and ticket-done confirmation.
 - **Never work from memory on constraints.** Re-read the ticket file (and spec excerpts) at ticket start and before review — the anti-drift nodes in Stage 4. Drift is how "spec said X, code does Y" happens.
 - **Spec drift**: if Stage 4 reveals the spec is wrong, update the spec + ADR (with a note) instead of silently coding around it.
+- **Never hardcode third-party SDK high-level API names in tickets**（勿在工单里写死第三方 SDK 高层 API 名）: SDK 大版本会改名/移位。写行为意图与验收标准，让实现者按当版本文档选正确符号；评审时按意图判断而非按名字比对。
+- **接口契约表不是可选项**: spec 缺契约表 → 实现者自由发挥选项面 → 「文档说有、代码没有」。Stage 2 必须产出，Stage 4 评审逐字段核验（见 review-axes.md）。
 
 ## References
 
@@ -239,6 +248,7 @@ progress inside a ticket.
 - `references/spec-template.md` — spec.md template for Stage 2
 - `references/ticket-template.md` — ticket template for Stage 3
 - `references/review-axes.md` — standards vs spec review detail for Stage 4
+- `references/case-study-toolscope-2026-08.md` — 首次完整跑测案例（n=1，含静默中断与契约泄漏记录）
 
 ## Attribution
 
